@@ -1,0 +1,192 @@
+
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <random>
+
+#define _CRT_SECURE_NO_WARNINGS 
+
+using namespace std;
+
+class Pet {
+public:
+    string name;
+    string kind;
+    string species;
+    int age;
+    string color;
+    char gender;
+
+    Pet(string name, string kind, string species, int age, string color, char gender)
+        : name(name), kind(kind), species(species), age(age), color(color), gender(gender) {}
+};
+
+class PetAdoptionSystem {
+private:
+    vector<Pet> pets;
+    bool generated = false; 
+
+    
+    string generateRandomName() {
+        const vector<string> names = { "Buddy", "Daisy", "Max", "Lucy", "Charlie", "Molly", "Bailey", "Sadie", "Rocky", "Lola" };
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<int> nameDistribution(0, names.size() - 1);
+        return names[nameDistribution(gen)];
+    }
+
+    vector<Pet> generateRandomPets() {
+        const vector<string> dogSpecies = { "Golden Retriever", "Poodle", "Labrador", "German Shepherd", "Bulldog" };
+        const vector<string> fishSpecies = { "Goldfish", "Guppy", "Betta", "Koi", "Angelfish" };
+        const vector<string> birdSpecies = { "Parrot", "Canary", "Cockatoo", "Macaw", "Lovebird" };
+        const vector<string> colors = { "Brown", "Black", "White", "Gray", "Orange" };
+
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<int> speciesDistribution(0, 4);
+        uniform_int_distribution<int> ageDistribution(1, 15);
+        uniform_int_distribution<int> colorDistribution(0, colors.size() - 1);
+        uniform_int_distribution<int> genderDistribution(0, 1);
+
+        vector<Pet> generatedPets;
+
+        int count = 5; 
+
+        for (int i = 0; i < count; ++i) {
+            int petType = speciesDistribution(gen);
+            string randomSpecies;
+            string randomKind;
+
+            if (petType == 0) {
+                randomSpecies = dogSpecies[petType];
+                randomKind = "Dog";
+            }
+            else if (petType == 1) {
+                randomSpecies = fishSpecies[petType];
+                randomKind = "Fish";
+            }
+            else {
+                randomSpecies = birdSpecies[petType];
+                randomKind = "Bird";
+            }
+
+            int randomAge = ageDistribution(gen);
+            string randomColor = colors[colorDistribution(gen)];
+            char randomGender = (genderDistribution(gen) == 0) ? 'M' : 'F';
+
+            string petName = generateRandomName(); 
+
+            Pet pet(petName, randomKind, randomSpecies, randomAge, randomColor, randomGender);
+            generatedPets.push_back(pet);
+        }
+        return generatedPets;
+    }
+
+public:
+    void displayMenu() {
+        cout << "===== Pet Adoption System =====\n";
+        cout << "1. Add a pet for adoption\n";
+        cout << "2. Display available pets for adoption\n";
+        cout << "3. Adopt a pet from the list\n";
+        cout << "4. Exit\n";
+    }
+
+    void addPetForAdoption() {
+        string name, kind, species, color;
+        int age;
+        char gender;
+
+        cout << "Enter pet name: ";
+        cin >> name;
+        cout << "Enter pet kind: ";
+        cin >> kind;
+        cout << "Enter pet species: ";
+        cin >> species;
+        cout << "Enter pet age: ";
+        cin >> age;
+        cout << "Enter pet color: ";
+        cin >> color;
+        cout << "Enter pet gender (M/F): ";
+        cin >> gender;
+
+        Pet pet(name, kind, species, age, color, gender);
+        pets.push_back(pet);
+        cout << "Pet added successfully!\n";
+    }
+
+    void displayAvailablePetsForAdoption() {
+        if (!generated) {
+            pets = generateRandomPets(); 
+            generated = true;
+        }
+
+        cout << "Displaying available pets for adoption:\n";
+        for (const auto& pet : pets) {
+            cout << "Name: " << pet.name << ", Kind: " << pet.kind << ", Species: " << pet.species
+                << ", Age: " << pet.age << ", Color: " << pet.color << ", Gender: " << pet.gender << "\n";
+        }
+    }
+
+    void adoptPetFromList() {
+        if (pets.empty()) {
+            cout << "No pets available for adoption.\n";
+            return;
+        }
+
+        string petName, petKind;
+        cout << "Enter the name of the pet you want to adopt: ";
+        cin >> petName;
+        cout << "Enter the kind of pet you want to adopt: ";
+        cin >> petKind;
+
+        bool petFound = false;
+        for (auto it = pets.begin(); it != pets.end(); ++it) {
+            if (it->name == petName && it->kind == petKind) {
+                cout << "Adopted " << it->name << ". Congratulations!\n";
+                pets.erase(it);
+                petFound = true;
+                break;
+            }
+        }
+
+        if (!petFound) {
+            cout << "Pet with name " << petName << " and kind " << petKind << " not found.\n";
+        }
+    }
+
+    void run() {
+        int choice;
+        do {
+            displayMenu();
+            cout << "Enter your choice (1-4): ";
+            cin >> choice;
+
+            switch (choice) {
+            case 1:
+                addPetForAdoption();
+                break;
+            case 2:
+                displayAvailablePetsForAdoption();
+                break;
+            case 3:
+                adoptPetFromList();
+                break;
+            case 4:
+                cout << "Exiting Pet Adoption System. Goodbye!\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter a valid option.\n";
+            }
+        } while (choice != 4);
+    }
+};
+
+int main() {
+    PetAdoptionSystem system;
+    system.run();
+
+    return 0;
+}
